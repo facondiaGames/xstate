@@ -1,5 +1,175 @@
 # @xstate/store
 
+## 2.6.2
+
+### Patch Changes
+
+- [#5136](https://github.com/statelyai/xstate/pull/5136) [`c051ff7ce7d09729ccc0630d684ef5168815f507`](https://github.com/statelyai/xstate/commit/c051ff7ce7d09729ccc0630d684ef5168815f507) Thanks [@Andarist](https://github.com/Andarist)! - Fixed an accidental used reference of `xstate` types
+
+## 2.6.1
+
+### Patch Changes
+
+- [#5109](https://github.com/statelyai/xstate/pull/5109) [`d67b71dd25d457a2a59f2c943db13f50fab7ec3d`](https://github.com/statelyai/xstate/commit/d67b71dd25d457a2a59f2c943db13f50fab7ec3d) Thanks [@davidkpiano](https://github.com/davidkpiano)! - Add React 19 as a peer dependency
+
+## 2.6.0
+
+### Minor Changes
+
+- [#5079](https://github.com/statelyai/xstate/pull/5079) [`25963966c394fc904dc9b701a420b6e204ebe7f7`](https://github.com/statelyai/xstate/commit/25963966c394fc904dc9b701a420b6e204ebe7f7) Thanks [@davidkpiano](https://github.com/davidkpiano)! - The `createStoreWithProducer(…)` function now uses the new configuration API:
+
+  ```ts
+  import { createStoreWithProducer } from '@xstate/store';
+  // DEPRECATED API
+  // const store = createStoreWithProducer(
+  //   producer,
+  //   {
+  //     count: 0
+  //   },
+  //   {
+  //     inc: (context, event) => {
+  //       context.count++;
+  //     }
+  //   }
+  // );
+
+  const store = createStoreWithProducer(producer, {
+    context: {
+      count: 0
+    },
+    on: {
+      inc: (context, event) => {
+        context.count++;
+      }
+    }
+  });
+  ```
+
+## 2.5.0
+
+### Minor Changes
+
+- [#5085](https://github.com/statelyai/xstate/pull/5085) [`51437a4d036029ab4ff74cb52721178b3e525c48`](https://github.com/statelyai/xstate/commit/51437a4d036029ab4ff74cb52721178b3e525c48) Thanks [@davidkpiano](https://github.com/davidkpiano)! - The `shallowEqual` comparator has been added for selector comparison:
+
+  ```tsx
+  import { shallowEqual } from '@xstate/store';
+  import { useSelector } from '@xstate/store/react';
+
+  import { store } from './store';
+
+  function MyComponent() {
+    const state = useSelector(
+      store,
+      (s) => {
+        return s.items.filter(/* ... */);
+      },
+      shallowEqual
+    );
+
+    // ...
+  }
+  ```
+
+## 2.4.0
+
+### Minor Changes
+
+- [#5064](https://github.com/statelyai/xstate/pull/5064) [`84aca37d0b02cb9cd5a32c8fd09e487bd8fe2a47`](https://github.com/statelyai/xstate/commit/84aca37d0b02cb9cd5a32c8fd09e487bd8fe2a47) Thanks [@davidkpiano](https://github.com/davidkpiano)! - There is a new single-argument config API for `createStore(config)`:
+
+  ```ts
+  const store = createStore({
+    // Types (optional)
+    types: {
+      emitted: {} as { type: 'incremented' }
+    },
+
+    // Context
+    context: { count: 0 },
+
+    // Transitions
+    on: {
+      inc: (context, event: { by: number }, enq) => {
+        enq.emit({ type: 'incremented' });
+
+        return { count: context.count + event.by };
+      },
+      dec: (context, event: { by: number }) => ({
+        count: context.count - event.by
+      })
+    }
+  });
+  ```
+
+- [#5064](https://github.com/statelyai/xstate/pull/5064) [`84aca37d0b02cb9cd5a32c8fd09e487bd8fe2a47`](https://github.com/statelyai/xstate/commit/84aca37d0b02cb9cd5a32c8fd09e487bd8fe2a47) Thanks [@davidkpiano](https://github.com/davidkpiano)! - You can now emit events from a store:
+
+  ```ts
+  import { createStore } from '@xstate/store';
+
+  const store = createStore({
+    context: {
+      count: 0
+    },
+    on: {
+      increment: (context, event, { emit }) => {
+        emit({ type: 'incremented' });
+        return { count: context.count + 1 };
+      }
+    }
+  });
+
+  store.on('incremented', () => {
+    console.log('incremented!');
+  });
+  ```
+
+## 2.3.0
+
+### Minor Changes
+
+- [#5056](https://github.com/statelyai/xstate/pull/5056) [`8c35da9a72`](https://github.com/statelyai/xstate/commit/8c35da9a72bf067a275335d0391ce9ab85ed8a12) Thanks [@steveadams](https://github.com/steveadams)! - You can now use the xstate/store package with SolidJS.
+
+  Import `useSelector` from `@xstate/store/solid`. Select the data you want via `useSelector(…)` and send events using `store.send(eventObject)`:
+
+  ```tsx
+  import { donutStore } from './donutStore.ts';
+  import { useSelector } from '@xstate/store/solid';
+
+  function DonutCounter() {
+    const donutCount = useSelector(donutStore, (state) => state.context.donuts);
+
+    return (
+      <div>
+        <button onClick={() => donutStore.send({ type: 'addDonut' })}>
+          Add donut ({donutCount()})
+        </button>
+      </div>
+    );
+  }
+  ```
+
+## 2.2.1
+
+### Patch Changes
+
+- [`b740aafdb1`](https://github.com/statelyai/xstate/commit/b740aafdb12ed6577ba31d0e07653bf99ebaca76) Thanks [@davidkpiano](https://github.com/davidkpiano)! - Fixed some small issues from #5027 regarding XState types being imported
+
+## 2.2.0
+
+### Minor Changes
+
+- [#5027](https://github.com/statelyai/xstate/pull/5027) [`758a78711d`](https://github.com/statelyai/xstate/commit/758a78711ddb35ce56951b551d48f9b6f54a37b5) Thanks [@davidkpiano](https://github.com/davidkpiano)! - You can now inspect XState stores using the `.inspect(inspector)` method:
+
+  ```ts
+  import { someStore } from './someStore';
+
+  someStore.inspect((inspEv) => {
+    console.log(inspEv);
+    // logs "@xstate.event" events and "@xstate.snapshot" events
+    // whenever an event is sent to the store
+  });
+  // The "@xstate.actor" event is immediately logged
+  ```
+
 ## 2.1.0
 
 ### Minor Changes
